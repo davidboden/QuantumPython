@@ -1,0 +1,74 @@
+import unittest
+from sympy.core.numbers import I
+from sympy.core.symbol import symbols
+from sympy.physics.paulialgebra import Pauli
+from sympy.physics.quantum import TensorProduct
+
+sigma1 = Pauli(1)
+sigma2 = Pauli(2)
+sigma3 = Pauli(3)
+
+tau1 = symbols("tau1", commutative = False)
+
+# Tests the evaluate_labelled_pauli_product function. Additional Pauli tests copied over
+# from the sympy test. Redefined to run as unittest rather than pytest.
+class SympyPauliTest(unittest.TestCase):
+
+    def test_Pauli(self):
+
+        assert sigma1 == sigma1
+        assert sigma1 != sigma2
+
+        assert sigma1*sigma2 == I*sigma3
+        assert sigma3*sigma1 == I*sigma2
+        assert sigma2*sigma3 == I*sigma1
+
+        assert sigma1*sigma1 == 1
+        assert sigma2*sigma2 == 1
+        assert sigma3*sigma3 == 1
+
+        assert sigma1**0 == 1
+        assert sigma1**1 == sigma1
+        assert sigma1**2 == 1
+        assert sigma1**3 == sigma1
+        assert sigma1**4 == 1
+
+        assert sigma3**2 == 1
+
+        assert sigma1*2*sigma1 == 2
+
+
+    def test_evaluate_labelled_pauli_product(self):
+        from sympy_pauli import evaluate_labelled_pauli_product
+
+        assert evaluate_labelled_pauli_product(I*sigma2*sigma3) == -sigma1
+
+        # Check issue 6471
+        assert evaluate_labelled_pauli_product(-I*4*sigma1*sigma2) == 4*sigma3
+
+        assert evaluate_labelled_pauli_product(
+            1 + I*sigma1*sigma2*sigma1*sigma2 + \
+            I*sigma1*sigma2*tau1*sigma1*sigma3 + \
+            ((tau1**2).subs(tau1, I*sigma1)) + \
+            sigma3*((tau1**2).subs(tau1, I*sigma1)) + \
+            TensorProduct(I*sigma1*sigma2*sigma1*sigma2, 1)
+        ) == 1 -I + I*sigma3*tau1*sigma2 - 1 - sigma3 - I*TensorProduct(1,1)
+
+    def test_evaluate_labelled_pauli_product_ordering(self):
+        from sympy_pauli import evaluate_labelled_pauli_product
+
+        # Simpler case where ordering is already present
+        assert evaluate_labelled_pauli_product(
+            (Pauli(1, label = "a") * Pauli(3, label = "b")) +
+            (Pauli(1, label = "a") * Pauli(3, label = "b"))
+        ) == 2 * Pauli(1, label = "a") * Pauli(3, label = "b")
+
+        # Issue 26745
+        assert evaluate_labelled_pauli_product(
+            (Pauli(1, label = "a") * Pauli(3, label = "b")) +
+            (Pauli(3, label = "b") * Pauli(1, label = "a"))
+        ) == 2 * Pauli(1, label = "a") * Pauli(3, label = "b")
+
+        assert evaluate_labelled_pauli_product(
+            Pauli(1, label = "a") * Pauli(3, label = "b") * Pauli(1, label = "a")
+        ) == Pauli(3, label = "b")
