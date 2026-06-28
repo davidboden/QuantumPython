@@ -34,13 +34,18 @@ class Qubit(Basic):
             evaluate_labelled_pauli_product(z)
         )
     
-    # The conjugate transpose of all the pauli matrices is the same as the original matrix
-    def evolve(self, expr: Expr):
+    def evolve(self, u: Expr, u_dagger: Expr = None):
+        # TODO: can we calculate u_dagger from u?
+        #       If so, we can remove the u_dagger argument and calculate it here.
+        #       The Pauli matrices don't need to change, only the coefficients of
+        #       the Pauli matrices change, and only if there are any non-real coefficients.
+        if u_dagger is None:
+            u_dagger = u
         return Qubit(
             self.qubitid,
-            evaluate_labelled_pauli_product(expand(expr * self.x * expr)),
-            evaluate_labelled_pauli_product(expand(expr * self.y * expr)),
-            evaluate_labelled_pauli_product(expand(expr * self.z * expr))
+            evaluate_labelled_pauli_product(expand(u_dagger * self.x * u)),
+            evaluate_labelled_pauli_product(expand(u_dagger * self.y * u)),
+            evaluate_labelled_pauli_product(expand(u_dagger * self.z * u))
         )
     
     def expand_and_simplify(self):
