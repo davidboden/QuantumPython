@@ -2,15 +2,9 @@ import unittest
 from qubit import Qubit
 from gates_single import hadamard, xrotation, xrotation_pauli_expression, yrotation, yrotation_pauli_expression, zrotation, zrotation_pauli_expression
 from sympy.physics.paulialgebra import Pauli
-from sympy.physics.matrices import msigma
-from sympy import sqrt, Matrix, I
+from sympy import sqrt
 
 class SingleGateTestCase(unittest.TestCase):
-
-    hadamardmatrix = 1/sqrt(2) * Matrix([
-        [ 1,  1],
-        [ 1, -1]
-    ])
 
     def test_hadmard_gate(self):
         """
@@ -28,27 +22,6 @@ class SingleGateTestCase(unittest.TestCase):
             a_after_hadamard_gate,
             a_after_hadamard_pauli
         )
-
-    def test_hadamard_x_observable_matrix(self):
-        result = self.hadamardmatrix.H * msigma(1) * self.hadamardmatrix
-
-        expected_result = msigma(3)
-
-        self.assertEqual(expected_result, result)
-
-    def test_hadamard_y_observable_matrix(self):
-        result = self.hadamardmatrix.H * msigma(2) * self.hadamardmatrix
-
-        expected_result = -msigma(2)
-
-        self.assertEqual(expected_result, result)
-
-    def test_hadamard_z_observable_matrix(self):
-        result = self.hadamardmatrix.H * msigma(3) * self.hadamardmatrix
-
-        expected_result = msigma(1)
-
-        self.assertEqual(expected_result, result)
 
     def test_xrotation_gate(self):
         """

@@ -1,9 +1,28 @@
 import unittest
 from qubit import Qubit
 from gates_single import hadamard
-from gates_multi import cnot, bell, invbell
+from gates_multi import cnot, cnot_pauli_expression, bell, invbell
 
 class MultiGateTestCase(unittest.TestCase):
+
+    def test_cnot_pauli_expression(self):
+        """
+        Check that cnot_pauli_expression has the same effect on each qubit's observables
+        as the cnot function when applied via evolve.
+        CNOT is self-adjoint so evolve takes a single argument.
+        """
+        c = Qubit.qubit_time_0("control")
+        t = Qubit.qubit_time_0("target")
+
+        u = cnot_pauli_expression("control", "target")
+
+        c_after_pauli = c.evolve(u)
+        t_after_pauli = t.evolve(u)
+
+        (c_after_cnot, t_after_cnot) = cnot(c, t)
+
+        self.assertEqual(c_after_pauli, c_after_cnot)
+        self.assertEqual(t_after_pauli, t_after_cnot)
 
     def test_bell_same_as_cnot_hadamard(self):
         """
