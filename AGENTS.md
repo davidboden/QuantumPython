@@ -22,3 +22,7 @@ Tests use pytest and must be run from the project root using the virtual environ
 ## Glossary
 
 - **Hadamard** refers to the Hadamard gate as used in quantum computing: [Hadamard transform — Quantum computing applications](https://en.wikipedia.org/wiki/Hadamard_transform#Quantum_computing_applications).
+
+- **Deutsch** refers to [David Deutsch](https://en.wikipedia.org/wiki/David_Deutsch).
+
+- **Jozsa** refers to [Richard Jozsa](https://en.wikipedia.org/wiki/Richard_Jozsa).
