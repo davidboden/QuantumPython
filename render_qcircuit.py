@@ -21,9 +21,15 @@ Rendering is one-way, .tex -> .svg:
     python3 render_qcircuit.py <name>     render images/<name>.tex
     python3 render_qcircuit.py --check    verify every .svg matches its .tex
 
-The pipeline is `latex` then `dvisvgm --no-fonts` (glyphs become paths, so the
-SVG displays without TeX fonts installed). Both ship with MacTeX/TeX Live.
+The pipeline is `latex` then `dvisvgm --no-fonts`. `latex` ships with
+MacTeX/TeX Live. `dvisvgm` must be Homebrew's build (`brew install dvisvgm`),
+not the older one bundled with MacTeX: qcircuit's `\meter` gate draws its
+needle with a PostScript special, and MacTeX's dvisvgm (2.3.5) isn't linked
+against Ghostscript, so it silently drops that special and the needle renders
+as a jagged staircase of tiny rectangles instead of a smooth diagonal line.
+Homebrew's dvisvgm is linked against Ghostscript and renders it correctly.
 """
+import os
 import subprocess
 import sys
 import tempfile
@@ -44,30 +50,54 @@ REPO_ROOT = Path(__file__).resolve().parent
 IMAGES_DIR = REPO_ROOT / "images"
 ZOOM = 1.5  # scale factor from TeX's natural size to a comfortable screen size
 
+# Homebrew's dvisvgm isn't part of the Homebrew texlive keg, so its bundled
+# kpathsea resolves TEXMFROOT relative to its own install dir and can't find
+# texlive's PostScript header files (tex.pro etc.) needed to process the
+# \meter needle's PostScript special. Point it at Homebrew texlive's tree
+# explicitly, via the stable unversioned `opt` symlink.
+_TEXLIVE_SHARE = Path("/opt/homebrew/opt/texlive/share")
+_DVISVGM_ENV = {
+    **os.environ,
+    "TEXMFCNF": str(_TEXLIVE_SHARE / "texmf-dist" / "web2c"),
+    "TEXMFROOT": str(_TEXLIVE_SHARE),
+} if _TEXLIVE_SHARE.exists() else os.environ
 
-def _run(cmd, cwd):
-    """Run a compile step, surfacing the tool's log tail if it fails."""
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+
+def _run(cmd, cwd, env=None) -> str:
+    """Run a compile step, surfacing the tool's log tail if it fails.
+
+    Returns the combined stdout+stderr on success, so callers can inspect it
+    for warnings even when the command didn't fail.
+    """
+    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, env=env)
+    output = result.stdout + result.stderr
     if result.returncode != 0:
-        tail = "\n".join((result.stdout + result.stderr).splitlines()[-30:])
+        tail = "\n".join(output.splitlines()[-30:])
         raise RuntimeError(f"{cmd[0]} failed:\n{tail}")
+    return output
 
 
-def render_svg(body: str) -> bytes:
-    """Compile a \\Qcircuit body and return the SVG bytes."""
+def render_svg(body: str, capture_log: bool = False):
+    """Compile a \\Qcircuit body and return the SVG bytes.
+
+    If capture_log is True, returns (svg_bytes, log) instead, where log is
+    the combined latex + dvisvgm output (including any warnings).
+    """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         (tmp_path / "circuit.tex").write_text(TEMPLATE % body.strip())
 
-        _run(
+        log = _run(
             ["latex", "-interaction=nonstopmode", "-halt-on-error", "circuit.tex"],
             cwd=tmp_path,
         )
-        _run(
+        log += _run(
             ["dvisvgm", "--no-fonts", "-Z", str(ZOOM), "-o", "circuit.svg", "circuit.dvi"],
             cwd=tmp_path,
+            env=_DVISVGM_ENV,
         )
-        return (tmp_path / "circuit.svg").read_bytes()
+        svg_bytes = (tmp_path / "circuit.svg").read_bytes()
+        return (svg_bytes, log) if capture_log else svg_bytes
 
 
 def render(name: str) -> Path:
