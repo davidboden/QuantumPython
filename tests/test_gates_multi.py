@@ -1,7 +1,7 @@
 import unittest
 from qubit import Qubit
 from gates_single import hadamard
-from gates_multi import cnot, cnot_pauli_expression, bell, invbell
+from gates_multi import cnot, cnot_pauli_expression, bell, invbell, toffoli, toffoli_pauli_expression
 
 class MultiGateTestCase(unittest.TestCase):
 
@@ -23,6 +23,28 @@ class MultiGateTestCase(unittest.TestCase):
 
         self.assertEqual(c_after_pauli, c_after_cnot)
         self.assertEqual(t_after_pauli, t_after_cnot)
+
+    def test_toffoli_pauli_expression(self):
+        """
+        Check that toffoli_pauli_expression has the same effect on each qubit's observables
+        as the toffoli function when applied via evolve.
+        Toffoli is self-adjoint so evolve takes a single argument.
+        """
+        c1 = Qubit.qubit_time_0("control1")
+        c2 = Qubit.qubit_time_0("control2")
+        t = Qubit.qubit_time_0("target")
+
+        u = toffoli_pauli_expression("control1", "control2", "target")
+
+        c1_after_pauli = c1.evolve(u)
+        c2_after_pauli = c2.evolve(u)
+        t_after_pauli = t.evolve(u)
+
+        (c1_after_toffoli, c2_after_toffoli, t_after_toffoli) = toffoli(c1, c2, t)
+
+        self.assertEqual(c1_after_pauli, c1_after_toffoli)
+        self.assertEqual(c2_after_pauli, c2_after_toffoli)
+        self.assertEqual(t_after_pauli, t_after_toffoli)
 
     def test_bell_same_as_cnot_hadamard(self):
         """
