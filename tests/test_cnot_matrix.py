@@ -1,23 +1,22 @@
 import unittest
-from sympy import eye
+from sympy import eye, Matrix
 from sympy.physics.matrices import msigma
 from sympy.physics.quantum import TensorProduct
-from sympy.physics.paulialgebra import Pauli
 from qubit import Qubit
-from gates_multi import cnot
+from gates_multi import cnot, cnot_pauli_expression
+from tests.pauli_matrix import pauli_expr_to_matrix
+
 
 class CnotMatrixTestCase(unittest.TestCase):
 
-    # CNOT matrix is it's own transpose
-    cnotmatrix = TensorProduct((eye(2) + msigma(3)) / 2, eye(2)) + TensorProduct((eye(2) - msigma(3)) / 2, msigma(1))
-    # from sympy import Matrix
-    # cnotmatrix = Matrix([
-    #     [1, 0, 0, 0],
-    #     [0, 1, 0, 0],
-    #     [0, 0, 0, 1],
-    #     [0, 0, 1, 0]
-    # ])
-    cnotpauli = ((1 + Pauli(3, label="control")) / 2) + (((1 - Pauli(3, label="control")) * Pauli(1, label="target")) / 2)
+    # CNOT matrix (its own transpose), hardcoded in the |0> = +1 Z-eigenvalue
+    # convention: X fires on the target when the control is |1> (lower block).
+    cnotmatrix = Matrix([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 0, 1, 0],
+    ])
 
     # The Deutsch and Hayden paper uses this arrangement, which applies the X
     # rotation if the control qubit z-observable has an eigenvalue of 1, which
@@ -31,9 +30,11 @@ class CnotMatrixTestCase(unittest.TestCase):
         control_qubit = Qubit.qubit_time_0("control")
         target_qubit = Qubit.qubit_time_0("target")
 
+        u = cnot_pauli_expression("control", "target")
+
         # Use evolve with the pauli expression
-        control_qubit_after_evolve = control_qubit.evolve(self.cnotpauli)
-        target_qubit_after_evolve = target_qubit.evolve(self.cnotpauli)
+        control_qubit_after_evolve = control_qubit.evolve(u)
+        target_qubit_after_evolve = target_qubit.evolve(u)
 
         # Use the gate definition with hardcoded (faster) behaviour
         (control_qubit_after_gate, target_qubit_after_gate) = cnot(control_qubit, target_qubit)
@@ -42,6 +43,15 @@ class CnotMatrixTestCase(unittest.TestCase):
         # behaviour represents the Pauli-based transformation
         assert control_qubit_after_evolve == control_qubit_after_gate
         assert target_qubit_after_evolve == target_qubit_after_gate
+
+    def test_pauli_expression_matches_hardcoded_matrix(self):
+        # gates_multi.cnot_pauli_expression, as a matrix, is the hardcoded CNOT.
+        self.assertEqual(
+            pauli_expr_to_matrix(
+                cnot_pauli_expression("control", "target"), ("control", "target")
+            ),
+            self.cnotmatrix,
+        )
 
 
     def test_control_x_observable(self):
