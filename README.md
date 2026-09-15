@@ -25,3 +25,25 @@ You will also need some elementary Python programming knowledge to read and run 
 ## Series overview
 
 This series builds up the tools needed to understand quantum information flow using the Heisenberg picture. The notebooks cover qubit state representation, projectors, observables, unitary transformations, and a Python toolkit for working with the Heisenberg representation. The series concludes by applying these tools to understand quantum teleportation.
+
+## Contents
+
+### Foundations
+
+| Notebook | Summary |
+|---|---|
+| [001 QubitState](001%20QubitState.ipynb) | Introduces the Schrödinger picture of a single qubit's state as a vector on the unit circle. |
+| [002 Projectors](002%20Projectors.ipynb) | Explains how a measurement basis is represented by a pair of orthogonal projectors. |
+| [003 Observables](003%20Observables.ipynb) | Combines projector pairs into observables, such as the X and Z observables. |
+| [004 UnitaryTransformations](004%20UnitaryTransformations.ipynb) | Shows how quantum gates act on the Schrödinger state as unitary matrices. |
+| [005 PauliAlgebra](005%20PauliAlgebra.ipynb) | Recasts unitary transformations more compactly using the closed algebra of the Pauli matrices. |
+| [006 MultipleQubits](006%20MultipleQubits.ipynb) | Extends the single-qubit Schrödinger, matrix, and Pauli representations to systems of multiple qubits. |
+| [007 CompoundObservables](007%20CompoundObservables.ipynb) | Shows how entangling interactions turn a qubit's observable into an expression involving other qubits' observables. |
+
+### Algorithms and applications
+
+| Notebook | Summary |
+|---|---|
+| [101 DeutschJozsaAlgorithm](101%20DeutschJozsaAlgorithm.ipynb) | Uses the Heisenberg picture to explain the Deutsch-Jozsa algorithm for distinguishing constant from balanced functions. |
+| [102 SimonsProblem](102%20SimonsProblem.ipynb) | Applies the toolkit to Simon's problem, finding the hidden string of a two-to-one function. |
+| [103 Teleportation](103%20Teleportation.ipynb) | Explains quantum teleportation by tracking correlations between entangled qubits' observables. |
