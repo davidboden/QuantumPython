@@ -18,7 +18,9 @@ Using the Heisenberg picture, we can form a deeper and simpler understanding of 
 
 To follow this exposition you will need enough linear algebra to be able to multiply matrices together — for example, to calculate the result of multiplying the Pauli X matrix by itself:
 
-$$X \cdot X = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$$
+```math
+X \cdot X = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}
+```
 
 You will also need some elementary Python programming knowledge to read and run the code examples.
 
