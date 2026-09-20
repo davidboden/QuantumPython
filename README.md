@@ -24,6 +24,8 @@ X \cdot X = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} \begin{bmatrix} 0 & 1 \
 
 You will also need some elementary Python programming knowledge to read and run the code examples.
 
+Clone the git repository locally and open the project in <img src="https://code.visualstudio.com/assets/branding/code-stable.png" alt="" width="20" height="20" valign="middle"/> [Visual Studio Code](https://code.visualstudio.com/). Set up Python and execute the notebooks.
+
 ## Series overview
 
 This series builds up the tools needed to understand quantum information flow using the Heisenberg picture. The notebooks cover qubit state representation, projectors, observables, unitary transformations, and a Python toolkit for working with the Heisenberg representation. The series concludes by applying these tools to understand quantum teleportation.
